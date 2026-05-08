@@ -1,7 +1,11 @@
 # Sprite Extractor / 雪碧图拆分工具
 
 Demo
+Input
+
 <img width="1662" height="946" alt="gptgen1" src="https://github.com/user-attachments/assets/1c09d900-4aa7-4f92-96ab-3ac715cede4a" />
+Output
+
 <img width="2088" height="1049" alt="image" src="https://github.com/user-attachments/assets/fb0f3600-5042-4184-9c1d-d15c5b72211d" />
 
 
