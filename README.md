@@ -18,7 +18,7 @@ Output
 ## Features / 功能特性
 
 - **自动检测** — 使用 OpenCV 轮廓检测自动识别雪碧图中的子图，无需 plist/xml/json 数据文件
-- **智能白色背景识别** — 通过 RGB 三通道阈值判断，精确分离白色背景与前景内容
+- **自定义背景色** — 支持指定任意背景色（RGB 或十六进制），不再局限于白色背景
 - **命令行操作** — 纯 CLI 交互，支持批量处理，适合脚本化工作流
 - **透明通道支持** — 优先使用 Alpha 通道检测，兼容无透明通道的雪碧图
 - **噪点过滤** — 可配置最小面积阈值，过滤碎片噪点
@@ -87,7 +87,8 @@ Options:
   --min-area INT       最小轮廓面积，过滤噪点（默认: 100 像素²）
   --padding INT        裁剪边距填充像素（默认: 1）
   --tolerance INT      背景色容差，值越小边缘越精确（默认: 15）
-  --bg-threshold INT   白色背景阈值，RGB 三通道都高于此值视为背景（默认: 240）
+  --bg-threshold INT   背景色阈值（默认: 240）
+  --bg-color COLOR     指定背景色，支持 "R,G,B" 或 "#RRGGBB"（默认: 白色）
   -h, --help           显示帮助信息
 ```
 
@@ -109,8 +110,14 @@ python sprite_extractor.py --padding 5
 # 更严格的白色背景检测（适用于接近白色但不是纯白的背景）
 python sprite_extractor.py --bg-threshold 250
 
-# 更宽松的白色背景检测（适用于灰白色背景）
-python sprite_extractor.py --bg-threshold 220
+# 去除绿色底色
+python sprite_extractor.py --bg-color "#00FF00"
+
+# 去除灰色底色
+python sprite_extractor.py --bg-color "128,128,128"
+
+# 去除蓝色底色，手动调大颜色距离容差
+python sprite_extractor.py --bg-color "0,0,255" --bg-threshold 80
 
 # 组合使用
 python sprite_extractor.py -i sprites -o results --min-area 200 --padding 3
@@ -121,7 +128,7 @@ python sprite_extractor.py -i sprites -o results --min-area 200 --padding 3
 ## How It Works / 工作原理
 
 1. **读取图像** — 使用 OpenCV 读取雪碧图（支持 PNG/JPG/BMP/WebP）
-2. **生成遮罩** — 优先使用 Alpha 通道；无透明通道时通过 RGB 三通道阈值判断白色背景
+2. **生成遮罩** — 优先使用 Alpha 通道；无透明通道时根据背景色（默认白色，可自定义）生成前景遮罩
 3. **形态学处理** — 闭运算填充前景内部孔洞，开运算去除小噪点
 4. **轮廓检测** — 查找外部轮廓，过滤小于阈值的噪点
 5. **背景透明化** — 将白色背景像素转换为透明通道
@@ -131,6 +138,7 @@ python sprite_extractor.py -i sprites -o results --min-area 200 --padding 3
 
 | 场景 | 建议调整 |
 |------|----------|
+| 背景不是白色（如绿色、蓝色） | 使用 `--bg-color`（如 `"#00FF00"`） |
 | 子图之间有间隙但检测不到 | 降低 `--bg-threshold`（如 220） |
 | 背景不是纯白而是灰白 | 降低 `--bg-threshold`（如 200） |
 | 检测到太多噪点碎片 | 增大 `--min-area`（如 500） |
